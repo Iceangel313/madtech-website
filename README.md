@@ -1,18 +1,9 @@
 # madtech-website
 
-Static site for MadTech — mirror of the official site served at https://madtech.it (hosted on the company VPS behind Caddy, web root `shared-services/madtech-www`).
+Source archive of the MadTech company website.
 
-## Structure
+**The official site is https://madtech.it** (served from the company VPS via Caddy, web root `shared-services/madtech-www`).
 
-- `site/` — plain static HTML (self-contained pages, inline CSS, no build step)
-  - `index.html` — homepage: chi siamo, servizi, team, contatti
-  - `team.html` — team page
-  - `robots.txt`, `sitemap.xml` — point to the canonical host `madtech.it`
+The GitHub Pages mirror was retired on 2026-07-16 by board decision (duplicate content hurt search ranking). The Pages site is deleted and the deploy workflow is disabled — do not re-enable without board approval on the issue thread.
 
-## Deploy
-
-Every push to `main` publishes `site/` to GitHub Pages via `.github/workflows/deploy.yml`. No build step.
-
-The canonical host is **madtech.it**; all pages carry `rel="canonical"` pointing there, so the Pages copy does not compete with the official site in search results.
-
-To update: edit the files under `site/` (keep them in sync with the VPS web root) and push.
+`site/` holds a static snapshot of the VPS web root. It may lag behind production; madtech.it is authoritative.
