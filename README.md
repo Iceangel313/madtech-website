@@ -1,26 +1,18 @@
 # madtech-website
 
-MadTech company website. Next.js (App Router) with static export, deployed to GitHub Pages.
+Static site for MadTech — mirror of the official site served at https://madtech.it (hosted on the company VPS behind Caddy, web root `shared-services/madtech-www`).
 
-## Stack
+## Structure
 
-- Next.js 15, React 19, TypeScript
-- Plain CSS (no framework), Google Fonts via `next/font`
-- Static export (`output: "export"`) — no server runtime needed
+- `site/` — plain static HTML (self-contained pages, inline CSS, no build step)
+  - `index.html` — homepage: chi siamo, servizi, team, contatti
+  - `team.html` — team page
+  - `robots.txt`, `sitemap.xml` — point to the canonical host `madtech.it`
 
-## Development
+## Deploy
 
-```bash
-npm install
-npm run dev
-```
+Every push to `main` publishes `site/` to GitHub Pages via `.github/workflows/deploy.yml`. No build step.
 
-## Deployment
+The canonical host is **madtech.it**; all pages carry `rel="canonical"` pointing there, so the Pages copy does not compete with the official site in search results.
 
-Every push to `main` triggers `.github/workflows/deploy.yml`, which builds the static
-export and publishes it to GitHub Pages.
-
-Live: https://iceangel313.github.io/madtech-website/
-
-The `basePath` is set to `/madtech-website` in production (`next.config.ts`). If the
-site moves to a custom domain or different host, remove or adjust `basePath`.
+To update: edit the files under `site/` (keep them in sync with the VPS web root) and push.

@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Team MadTech — David Proetto e Matteo Arrigo, cofondatori</title>
+<meta name="description" content="Il team MadTech: David Proetto, ingegnere elettronico, e Matteo Arrigo, sviluppatore. I due cofondatori che progettano, sviluppano e riparano — dal silicio al deploy.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://madtech.it/team.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MadTech">
+<meta property="og:title" content="Team MadTech — David Proetto e Matteo Arrigo">
+<meta property="og:description" content="I due cofondatori di MadTech: ingegneria elettronica e sviluppo software, dal silicio al deploy.">
+<meta property="og:url" content="https://madtech.it/team.html">
+<meta property="og:locale" content="it_IT">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "url": "https://madtech.it/team.html",
+  "name": "Team MadTech",
+  "about": {
+    "@type": "Organization",
+    "name": "MadTech",
+    "url": "https://madtech.it/",
+    "founder": [
+      { "@type": "Person", "name": "David Proetto", "jobTitle": "Ingegnere elettronico — Cofondatore" },
+      { "@type": "Person", "name": "Matteo Arrigo", "jobTitle": "Sviluppatore — Cofondatore" }
+    ]
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:        #04070c;
+    --bg-1:      #070b14;
+    --bg-2:      #0b1220;
+    --panel:     rgba(10, 18, 32, 0.6);
+    --line:      rgba(120, 180, 255, 0.18);
+    --line-hot:  rgba(0, 245, 255, 0.55);
+    --grid:      rgba(80, 140, 220, 0.07);
+    --fg:        #e6f1ff;
+    --fg-2:      #a4b6cf;
+    --fg-3:      #5e7290;
+    --cyan:      #00f5ff;
+    --magenta:   #ff2ec8;
+    --amber:     #ffb547;
+    --lime:      #b6ff00;
+    --red:       #ff3860;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  html { scroll-behavior: smooth; }
+
+  ::selection { background: var(--cyan); color: #000; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ===== GLOBAL DECORS ===== */
+  .scanlines {
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.02) 0,
+      rgba(255,255,255,0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+    z-index: 1000;
+    mix-blend-mode: overlay;
+  }
+  .vignette {
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
+    z-index: 999;
+  }
+  .grid-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: -1;
+    mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
+  }
+  .noise {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1001;
+    opacity: 0.04;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* ===== HUD CHROME ===== */
+  .hud-corner {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid var(--cyan);
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .hud-corner.tl { top: 16px; left: 16px; border-right: none; border-bottom: none; }
+  .hud-corner.tr { top: 16px; right: 16px; border-left: none; border-bottom: none; }
+  .hud-corner.bl { bottom: 16px; left: 16px; border-right: none; border-top: none; }
+  .hud-corner.br { bottom: 16px; right: 16px; border-left: none; border-top: none; }
+
+  /* ===== NAV ===== */
+  nav.top {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 50;
+    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(4, 7, 12, 0.6);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.top::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.7;
+    animation: scan-h 6s linear infinite;
+  }
+  @keyframes scan-h {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  nav.top .wrap {
+    height: 60px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 32px;
+    padding: 0 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .logo svg { width: 30px; height: 30px; }
+  .logo .ver {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 400;
+    font-size: 9px;
+    color: var(--cyan);
+    background: rgba(0, 245, 255, 0.08);
+    border: 1px solid var(--line-hot);
+    padding: 2px 6px;
+    letter-spacing: 0.1em;
+  }
+  .nav-links {
+    display: flex; justify-content: center; gap: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+  .nav-links a {
+    color: var(--fg-2);
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    position: relative;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-links a::before {
+    content: "";
+    width: 4px; height: 4px;
+    background: var(--cyan);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .nav-links a:hover { color: var(--cyan); border-color: var(--line-hot); background: rgba(0, 245, 255, 0.04); }
+  .nav-links a:hover::before { opacity: 1; }
+  .nav-links a.active { color: var(--cyan); border-color: var(--line-hot); background: rgba(0, 245, 255, 0.04); }
+  .nav-links a.active::before { opacity: 1; }
+  @media (max-width: 900px) { .nav-links { display: none; } }
+
+  .nav-status {
+    display: flex; align-items: center; gap: 16px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+  .nav-status .stat { display: flex; align-items: center; gap: 6px; }
+  .nav-status .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime);
+    animation: pulse-lime 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-lime {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.85); }
+  }
+  @media (max-width: 700px) { .nav-status .stat:not(:last-child) { display: none; } }
+
+  /* ===== PAGE HERO ===== */
+  .page-hero {
+    padding: 140px 32px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (max-width: 700px) { .page-hero { padding: 110px 20px 10px; } }
+
+  .typewriter-line {
+    font-family: "JetBrains Mono", monospace;
+    font-size: clamp(13px, 1.3vw, 16px);
+    color: var(--lime);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .typewriter-line::before { content: ">"; color: var(--lime); }
+  .cursor {
+    display: inline-block;
+    width: 9px; height: 1em;
+    background: var(--lime);
+    margin-left: 6px;
+    animation: blink 0.8s steps(1) infinite;
+    vertical-align: text-bottom;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  h1.glitch {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900;
+    font-size: clamp(40px, 8vw, 110px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    margin: 0;
+    position: relative;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  h1.glitch span.line { display: block; }
+  h1.glitch .neon {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--cyan);
+    text-shadow: 0 0 18px rgba(0, 245, 255, 0.5), 0 0 1px var(--cyan);
+  }
+  h1.glitch::before, h1.glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+  h1.glitch::before {
+    color: var(--magenta);
+    animation: glitch-1 4s infinite steps(1);
+    clip-path: inset(0 0 60% 0);
+    transform: translate(-2px, 0);
+    mix-blend-mode: screen;
+    opacity: 0.8;
+  }
+  h1.glitch::after {
+    color: var(--cyan);
+    animation: glitch-2 3.3s infinite steps(1);
+    clip-path: inset(60% 0 0 0);
+    transform: translate(2px, 0);
+    mix-blend-mode: screen;
+    opacity: 0.8;
+  }
+  @keyframes glitch-1 {
+    0%, 92%, 100% { transform: translate(0,0); opacity: 0; }
+    93% { transform: translate(-4px, 1px); opacity: 0.9; clip-path: inset(20% 0 50% 0); }
+    94% { transform: translate(3px, -2px); opacity: 0.9; clip-path: inset(70% 0 10% 0); }
+    95% { transform: translate(-2px, 2px); opacity: 0.9; clip-path: inset(40% 0 30% 0); }
+    96% { transform: translate(0, 0); opacity: 0; }
+  }
+  @keyframes glitch-2 {
+    0%, 88%, 100% { transform: translate(0,0); opacity: 0; }
+    89% { transform: translate(3px, 1px); opacity: 0.9; clip-path: inset(60% 0 20% 0); }
+    90% { transform: translate(-3px, -2px); opacity: 0.9; clip-path: inset(15% 0 60% 0); }
+    91% { transform: translate(2px, 1px); opacity: 0.9; clip-path: inset(35% 0 35% 0); }
+    92% { transform: translate(0, 0); opacity: 0; }
+  }
+
+  .page-hero .hero-sub {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    color: var(--fg-2);
+    max-width: 60ch;
+    line-height: 1.65;
+    margin: 28px 0 0;
+  }
+
+  .telemetry {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 16px 0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-top: 48px;
+  }
+  .telemetry .item {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 0 16px;
+    border-right: 1px solid var(--line);
+  }
+  .telemetry .item:last-child { border-right: none; }
+  .telemetry .k { color: var(--fg-3); font-size: 9px; }
+  .telemetry .v { color: var(--cyan); font-weight: 500; }
+  @media (max-width: 700px) {
+    .telemetry { grid-template-columns: repeat(2, 1fr); gap: 12px 0; }
+    .telemetry .item:nth-child(2n) { border-right: none; }
+  }
+
+  /* ===== SECTIONS ===== */
+  section { padding: 80px 32px; position: relative; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 700px) { section { padding: 60px 20px; } }
+
+  .section-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 56px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head .id {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border: 1px solid var(--line-hot);
+    padding: 6px 12px;
+    background: rgba(0,245,255,0.06);
+  }
+  .section-head h2 {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 700;
+    font-size: clamp(24px, 3.4vw, 44px);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .section-head .ts {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+  }
+  @media (max-width: 700px) {
+    .section-head { grid-template-columns: 1fr; gap: 12px; }
+    .section-head .ts { display: none; }
+  }
+
+  /* ===== CREW ===== */
+  .crew { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 900px) { .crew { grid-template-columns: 1fr; } }
+
+  .operator { background: var(--panel); border: 1px solid var(--line); padding: 0; position: relative; backdrop-filter: blur(10px); }
+  .op-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    background: rgba(0,245,255,0.03);
+  }
+  .op-head .id { color: var(--cyan); }
+  .op-head .status { display: flex; align-items: center; gap: 6px; color: var(--lime); }
+  .op-head .status .d { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 6px var(--lime); animation: pulse-lime 1.5s infinite; }
+
+  .op-body { padding: 28px; display: grid; grid-template-columns: 200px 1fr; gap: 28px; }
+  @media (max-width: 600px) { .op-body { grid-template-columns: 1fr; } }
+
+  .portrait {
+    aspect-ratio: 4/5;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.15), transparent 70%),
+      repeating-linear-gradient(45deg, transparent 0 6px, rgba(120,180,255,0.04) 6px 7px);
+    border: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .portrait::before, .portrait::after {
+    content: "";
+    position: absolute;
+    width: 18px; height: 18px;
+    border: 2px solid var(--cyan);
+  }
+  .portrait::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+  .portrait::after  { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+  .portrait .crosshair { position: absolute; inset: 0; display: grid; place-items: center; }
+  .portrait .crosshair svg { width: 60%; height: 60%; opacity: 0.3; color: var(--cyan); animation: rotate 30s linear infinite; }
+  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .portrait .scan {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    box-shadow: 0 0 10px var(--cyan);
+    animation: scan-v 3s linear infinite;
+  }
+  @keyframes scan-v { 0% { top: 0%; } 100% { top: 100%; } }
+  .portrait .label {
+    position: absolute; bottom: 8px; left: 8px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    background: rgba(4,7,12,0.7);
+    padding: 3px 6px;
+    border: 1px solid var(--line-hot);
+  }
+
+  .op-info .role {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--magenta);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .op-info h3 { font-family: "Orbitron", sans-serif; font-size: 26px; text-transform: uppercase; margin: 0 0 14px; line-height: 1.1; }
+  .op-info p  { color: var(--fg-2); font-size: 13px; line-height: 1.65; margin: 0 0 22px; }
+  .op-skills .label { font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 10px; }
+  .meter-list { display: flex; flex-direction: column; gap: 8px; }
+  .meter { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .meter .name { color: var(--fg-2); }
+  .meter .bars { display: inline-flex; gap: 2px; }
+  .meter .bars span { width: 8px; height: 10px; background: var(--cyan); box-shadow: 0 0 4px rgba(0,245,255,0.5); }
+  .meter .bars span.off { background: rgba(255,255,255,0.08); box-shadow: none; }
+  .operator[data-color="magenta"] .meter .bars span:not(.off) { background: var(--magenta); box-shadow: 0 0 4px rgba(255,46,200,0.5); }
+  .operator[data-color="magenta"] .op-info .role { color: var(--cyan); }
+
+  /* ===== DOSSIER ===== */
+  .dossier {
+    margin-top: 0;
+    padding: 0 28px 28px;
+  }
+  .dossier .hud-list { list-style: none; margin: 0; padding: 16px 0 0; font-size: 12px; border-top: 1px dashed var(--line); }
+  .dossier .hud-list li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--line);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .dossier .hud-list li:last-child { border-bottom: none; }
+  .dossier .hud-list .k { color: var(--fg-3); font-size: 10px; }
+  .dossier .hud-list .v { color: var(--fg); }
+  .dossier .hud-list .v a:hover { color: var(--cyan); text-shadow: 0 0 6px rgba(0,245,255,0.6); }
+
+  /* ===== RECRUIT SLOT ===== */
+  .operator.recruit { border-style: dashed; opacity: 0.85; }
+  .operator.recruit .op-head .id { color: var(--amber); }
+  .operator.recruit .op-head .status { color: var(--amber); }
+  .operator.recruit .op-head .status .d { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .operator.recruit .portrait .crosshair svg { color: var(--amber); }
+  .operator.recruit .portrait .scan { background: linear-gradient(90deg, transparent, var(--amber), transparent); box-shadow: 0 0 10px var(--amber); }
+  .operator.recruit .portrait .label { color: var(--amber); border-color: rgba(255,181,71,0.55); }
+  .operator.recruit .op-info .role { color: var(--amber); }
+
+  /* ===== CTA ===== */
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .btn {
+    font-family: "Orbitron", sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    padding: 16px 24px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--fg);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 12px;
+    overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,245,255,0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .btn:hover::before { transform: translateX(100%); }
+  .btn:hover { border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 8px rgba(0,245,255,0.6); }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--cyan), #008fa8);
+    border-color: var(--cyan);
+    color: #001218;
+    box-shadow: 0 0 24px rgba(0,245,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .btn.primary:hover { color: #001218; text-shadow: none; box-shadow: 0 0 40px rgba(0,245,255,0.7), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+
+  /* ===== FOOTER ===== */
+  footer {
+    padding: 40px 32px;
+    border-top: 1px solid var(--line);
+    margin-top: 60px;
+    max-width: 1400px;
+    margin-left: auto; margin-right: auto;
+  }
+  footer .row {
+    display: flex; justify-content: space-between; flex-wrap: wrap;
+    gap: 16px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--fg-3);
+  }
+  footer .row .v { color: var(--fg-2); }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- HUD chrome -->
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+<div class="noise"></div>
+<div class="vignette"></div>
+<div class="hud-corner tl"></div>
+<div class="hud-corner tr"></div>
+<div class="hud-corner bl"></div>
+<div class="hud-corner br"></div>
+
+<!-- NAV -->
+<nav class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html">
+      <svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="2" y="2" width="26" height="26" stroke="var(--cyan)"/>
+        <path d="M7 22 L7 8 L15 18 L23 8 L23 22" stroke="var(--cyan)" fill="none"/>
+        <circle cx="15" cy="15" r="1.5" fill="var(--magenta)" stroke="none"/>
+      </svg>
+      <span>MadTech</span>
+      <span class="ver">v.7.21</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#servizi"><span>// Servizi</span></a>
+      <a href="team.html" class="active"><span>// Team</span></a>
+      <a href="index.html#stack"><span>// Stack</span></a>
+      <a href="index.html#processo"><span>// Processo</span></a>
+      <a href="index.html#contatti"><span>// Contatti</span></a>
+    </div>
+    <div class="nav-status">
+      <div class="stat"><span class="dot"></span><span>ONLINE</span></div>
+      <div class="stat"><span id="clock">--:--:--</span></div>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<header class="page-hero" id="top">
+  <div class="typewriter-line">load MadTech.crew // personnel database online<span class="cursor"></span></div>
+  <h1 class="glitch" data-text="IL TEAM.">
+    <span class="line">IL <span class="neon">TEAM.</span></span>
+  </h1>
+  <p class="hero-sub">Due operatori, due discipline complementari. Un ingegnere elettronico e uno sviluppatore con background hardware: insieme copriamo l'intera catena, dal silicio al deploy.</p>
+
+  <div class="telemetry">
+    <div class="item"><span class="k">// Unit</span><span class="v">CREW.MODULE</span></div>
+    <div class="item"><span class="k">// Operatori</span><span class="v">02 ATTIVI</span></div>
+    <div class="item"><span class="k">// Copertura</span><span class="v">HW + SW + FIELD</span></div>
+    <div class="item"><span class="k">// Status</span><span class="v">ACCEPTING_JOBS</span></div>
+  </div>
+</header>
+
+<!-- OPERATORI -->
+<section id="operatori">
+  <div class="section-head reveal">
+    <div class="id">// CREW.01</div>
+    <h2>Operatori</h2>
+    <div class="ts">/02 attivi · /00 in pausa</div>
+  </div>
+
+  <div class="crew">
+
+    <div class="operator reveal" data-color="cyan">
+      <div class="op-head">
+        <span class="id">// OP_01 :: ENGINEER</span>
+        <span class="status"><span class="d"></span>ONLINE</span>
+      </div>
+      <div class="op-body">
+        <div class="portrait">
+          <div class="crosshair">
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
+              <circle cx="50" cy="50" r="45"/>
+              <circle cx="50" cy="50" r="32"/>
+              <circle cx="50" cy="50" r="20"/>
+              <path d="M50 5v90M5 50h90"/>
+            </svg>
+          </div>
+          <div class="scan"></div>
+          <div class="label">// CAM.OP_01</div>
+        </div>
+        <div class="op-info">
+          <div class="role">// INGEGNERE ELETTRONICO</div>
+          <h3>David Proetto</h3>
+          <p>Ingegnere elettronico, esperienza industriale e nel settore della difesa nazionale. Definisce architetture, progetta schede, porta il rigore di sistemi complessi nei progetti del team.</p>
+          <div class="op-skills">
+            <div class="label">// CAPABILITY MATRIX</div>
+            <div class="meter-list">
+              <div class="meter"><span class="name">PCB Design</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+              <div class="meter"><span class="name">Embedded</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+              <div class="meter"><span class="name">Analog/Digital</span><span class="bars"><span></span><span></span><span></span><span></span><span class="off"></span></span></div>
+              <div class="meter"><span class="name">Power Electronics</span><span class="bars"><span></span><span></span><span></span><span></span><span class="off"></span></span></div>
+              <div class="meter"><span class="name">Testing &amp; Validation</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dossier">
+        <ul class="hud-list">
+          <li><span class="k">BASE</span><span class="v">Roma · remoto + on-site</span></li>
+          <li><span class="k">EMAIL</span><span class="v"><a href="mailto:david7.piesse21@madtech.it">david7.piesse21@madtech.it</a></span></li>
+          <li><span class="k">WHATSAPP</span><span class="v"><a href="https://wa.me/393403130338">+39 340 313 0338</a></span></li>
+          <li><span class="k">FOCUS</span><span class="v">Hardware · Elettronica · Consulenza</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="operator reveal" data-color="magenta">
+      <div class="op-head">
+        <span class="id">// OP_02 :: DEVELOPER</span>
+        <span class="status"><span class="d"></span>ONLINE</span>
+      </div>
+      <div class="op-body">
+        <div class="portrait">
+          <div class="crosshair">
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
+              <rect x="20" y="20" width="60" height="60"/>
+              <rect x="35" y="35" width="30" height="30"/>
+              <path d="M50 5v90M5 50h90"/>
+            </svg>
+          </div>
+          <div class="scan"></div>
+          <div class="label">// CAM.OP_02</div>
+        </div>
+        <div class="op-info">
+          <div class="role">// PROGRAMMATORE · PERITO INFORMATICO</div>
+          <h3>Matteo Arrigo</h3>
+          <p>Sviluppatore e tecnico con anni di esperienza sul campo. Scrivo software, riparo hardware, installo e configuro sistemi: dalla web app al cablaggio, sono la parte operativa del team.</p>
+          <div class="op-skills">
+            <div class="label">// CAPABILITY MATRIX</div>
+            <div class="meter-list">
+              <div class="meter"><span class="name">Web App</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+              <div class="meter"><span class="name">Firmware</span><span class="bars"><span></span><span></span><span></span><span></span><span class="off"></span></span></div>
+              <div class="meter"><span class="name">Hardware Repair</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+              <div class="meter"><span class="name">Electrical</span><span class="bars"><span></span><span></span><span></span><span></span><span class="off"></span></span></div>
+              <div class="meter"><span class="name">IT Setup</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dossier">
+        <ul class="hud-list">
+          <li><span class="k">BASE</span><span class="v">Catania · remoto + on-site</span></li>
+          <li><span class="k">EMAIL</span><span class="v"><a href="mailto:matteo@madtech.it">matteo@madtech.it</a></span></li>
+          <li><span class="k">WHATSAPP</span><span class="v"><a href="https://wa.me/393501864313">+39 350 186 4313</a></span></li>
+          <li><span class="k">FOCUS</span><span class="v">Software · Riparazioni · Impianti</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="operator recruit reveal">
+      <div class="op-head">
+        <span class="id">// OP_03 :: SLOT_LIBERO</span>
+        <span class="status"><span class="d"></span>STANDBY</span>
+      </div>
+      <div class="op-body">
+        <div class="portrait">
+          <div class="crosshair">
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
+              <polygon points="50,8 92,80 8,80"/>
+              <path d="M50 5v90M5 50h90"/>
+            </svg>
+          </div>
+          <div class="scan"></div>
+          <div class="label">// CAM.OP_03</div>
+        </div>
+        <div class="op-info">
+          <div class="role">// PROSSIMO OPERATORE</div>
+          <h3>Il team cresce</h3>
+          <p>MadTech è un'unità compatta ma in espansione. Quando il carico operativo lo richiede, collaboriamo con specialisti fidati — e questo slot aspetta il prossimo profilo giusto.</p>
+          <div class="ctas" style="margin-top: 0;">
+            <a href="index.html#contatti" class="btn"><span class="dot"></span>// Proponiti</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta" style="padding-top: 0;">
+  <div class="section-head reveal">
+    <div class="id">// CREW.02</div>
+    <h2>Metti il team al lavoro</h2>
+    <div class="ts">/risposta &lt; 24h lavorative</div>
+  </div>
+  <div class="ctas reveal" style="margin-top: 0;">
+    <a href="index.html#contatti" class="btn primary"><span class="dot"></span>Apri trasmissione</a>
+    <a href="index.html#servizi" class="btn"><span class="dot"></span>// Esplora moduli</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="row">
+    <span>© 2026 // MadTech · Studio tecnico</span>
+    <span class="v">P.IVA — da definire</span>
+    <span>System v7.21 // Made in Italy</span>
+  </div>
+</footer>
+
+<script>
+  // Live clock
+  function tick() {
+    const el = document.getElementById('clock');
+    if (el) el.textContent = new Date().toTimeString().slice(0, 8);
+  }
+  setInterval(tick, 1000); tick();
+
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

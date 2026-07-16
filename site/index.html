@@ -1,0 +1,1300 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MadTech — Studio tecnico hardware e software | David Proetto e Matteo Arrigo</title>
+<meta name="description" content="MadTech, studio tecnico fondato da David Proetto e Matteo Arrigo. Progettazione elettronica e PCB, sviluppo software e web app, riparazioni hardware, impianti. Dal silicio al deploy.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://madtech.it/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MadTech">
+<meta property="og:title" content="MadTech — Studio tecnico hardware e software">
+<meta property="og:description" content="Fondato da David Proetto e Matteo Arrigo. Progettazione elettronica, sviluppo software, riparazioni, impianti. Dal silicio al deploy.">
+<meta property="og:url" content="https://madtech.it/">
+<meta property="og:locale" content="it_IT">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MadTech — Studio tecnico hardware e software">
+<meta name="twitter:description" content="Fondato da David Proetto e Matteo Arrigo. Dal silicio al deploy.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "MadTech",
+  "url": "https://madtech.it/",
+  "description": "Studio tecnico hardware e software: progettazione elettronica e PCB, sviluppo software e web app, riparazioni hardware, impianti.",
+  "email": "puntoelettronica21@gmail.com",
+  "founder": [
+    { "@type": "Person", "name": "David Proetto", "jobTitle": "Ingegnere elettronico — Cofondatore" },
+    { "@type": "Person", "name": "Matteo Arrigo", "jobTitle": "Sviluppatore — Cofondatore" }
+  ],
+  "knowsAbout": ["PCB design", "elettronica", "firmware", "sviluppo web", "riparazione hardware", "impianti elettrici"]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:        #04070c;
+    --bg-1:      #070b14;
+    --bg-2:      #0b1220;
+    --panel:     rgba(10, 18, 32, 0.6);
+    --line:      rgba(120, 180, 255, 0.18);
+    --line-hot:  rgba(0, 245, 255, 0.55);
+    --grid:      rgba(80, 140, 220, 0.07);
+    --fg:        #e6f1ff;
+    --fg-2:      #a4b6cf;
+    --fg-3:      #5e7290;
+    --cyan:      #00f5ff;
+    --magenta:   #ff2ec8;
+    --amber:     #ffb547;
+    --lime:      #b6ff00;
+    --red:       #ff3860;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  html { scroll-behavior: smooth; }
+
+  ::selection { background: var(--cyan); color: #000; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ===== GLOBAL DECORS ===== */
+  .scanlines {
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.02) 0,
+      rgba(255,255,255,0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+    z-index: 1000;
+    mix-blend-mode: overlay;
+  }
+  .vignette {
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
+    z-index: 999;
+  }
+  .grid-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: -1;
+    mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
+  }
+  .noise {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1001;
+    opacity: 0.04;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* ===== HUD CHROME ===== */
+  .hud-corner {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid var(--cyan);
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .hud-corner.tl { top: 16px; left: 16px; border-right: none; border-bottom: none; }
+  .hud-corner.tr { top: 16px; right: 16px; border-left: none; border-bottom: none; }
+  .hud-corner.bl { bottom: 16px; left: 16px; border-right: none; border-top: none; }
+  .hud-corner.br { bottom: 16px; right: 16px; border-left: none; border-top: none; }
+
+  /* ===== NAV ===== */
+  nav.top {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 50;
+    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(4, 7, 12, 0.6);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.top::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.7;
+    animation: scan-h 6s linear infinite;
+  }
+  @keyframes scan-h {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  nav.top .wrap {
+    height: 60px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 32px;
+    padding: 0 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .logo svg { width: 30px; height: 30px; }
+  .logo .ver {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 400;
+    font-size: 9px;
+    color: var(--cyan);
+    background: rgba(0, 245, 255, 0.08);
+    border: 1px solid var(--line-hot);
+    padding: 2px 6px;
+    letter-spacing: 0.1em;
+  }
+  .nav-links {
+    display: flex; justify-content: center; gap: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+  .nav-links a {
+    color: var(--fg-2);
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    position: relative;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-links a::before {
+    content: "";
+    width: 4px; height: 4px;
+    background: var(--cyan);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .nav-links a:hover { color: var(--cyan); border-color: var(--line-hot); background: rgba(0, 245, 255, 0.04); }
+  .nav-links a:hover::before { opacity: 1; }
+  @media (max-width: 900px) { .nav-links { display: none; } }
+
+  .nav-status {
+    display: flex; align-items: center; gap: 16px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+  .nav-status .stat { display: flex; align-items: center; gap: 6px; }
+  .nav-status .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime);
+    animation: pulse-lime 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-lime {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.85); }
+  }
+  @media (max-width: 700px) { .nav-status .stat:not(:last-child) { display: none; } }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 100px 32px 60px;
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (max-width: 700px) { .hero { padding: 90px 20px 40px; } }
+
+  .hero-inner { width: 100%; display: grid; grid-template-columns: 1fr; gap: 60px; }
+
+  .telemetry {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 16px 0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+  .telemetry .item {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 0 16px;
+    border-right: 1px solid var(--line);
+  }
+  .telemetry .item:last-child { border-right: none; }
+  .telemetry .k { color: var(--fg-3); font-size: 9px; }
+  .telemetry .v { color: var(--cyan); font-weight: 500; }
+  @media (max-width: 700px) {
+    .telemetry { grid-template-columns: repeat(2, 1fr); gap: 12px 0; }
+    .telemetry .item:nth-child(2n) { border-right: none; }
+  }
+
+  h1.glitch {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900;
+    font-size: clamp(48px, 11vw, 168px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    margin: 0;
+    position: relative;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  h1.glitch span.line { display: block; }
+  h1.glitch .neon {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--cyan);
+    text-shadow: 0 0 18px rgba(0, 245, 255, 0.5), 0 0 1px var(--cyan);
+  }
+  h1.glitch::before, h1.glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+  h1.glitch::before {
+    color: var(--magenta);
+    animation: glitch-1 4s infinite steps(1);
+    clip-path: inset(0 0 60% 0);
+    transform: translate(-2px, 0);
+    mix-blend-mode: screen;
+    opacity: 0.8;
+  }
+  h1.glitch::after {
+    color: var(--cyan);
+    animation: glitch-2 3.3s infinite steps(1);
+    clip-path: inset(60% 0 0 0);
+    transform: translate(2px, 0);
+    mix-blend-mode: screen;
+    opacity: 0.8;
+  }
+  @keyframes glitch-1 {
+    0%, 92%, 100% { transform: translate(0,0); opacity: 0; }
+    93% { transform: translate(-4px, 1px); opacity: 0.9; clip-path: inset(20% 0 50% 0); }
+    94% { transform: translate(3px, -2px); opacity: 0.9; clip-path: inset(70% 0 10% 0); }
+    95% { transform: translate(-2px, 2px); opacity: 0.9; clip-path: inset(40% 0 30% 0); }
+    96% { transform: translate(0, 0); opacity: 0; }
+  }
+  @keyframes glitch-2 {
+    0%, 88%, 100% { transform: translate(0,0); opacity: 0; }
+    89% { transform: translate(3px, 1px); opacity: 0.9; clip-path: inset(60% 0 20% 0); }
+    90% { transform: translate(-3px, -2px); opacity: 0.9; clip-path: inset(15% 0 60% 0); }
+    91% { transform: translate(2px, 1px); opacity: 0.9; clip-path: inset(35% 0 35% 0); }
+    92% { transform: translate(0, 0); opacity: 0; }
+  }
+
+  .typewriter-line {
+    font-family: "JetBrains Mono", monospace;
+    font-size: clamp(13px, 1.3vw, 16px);
+    color: var(--lime);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .typewriter-line::before { content: ">"; color: var(--lime); }
+  .cursor {
+    display: inline-block;
+    width: 9px; height: 1em;
+    background: var(--lime);
+    margin-left: 6px;
+    animation: blink 0.8s steps(1) infinite;
+    vertical-align: text-bottom;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .hero-body {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 60px;
+    align-items: end;
+    margin-top: 40px;
+  }
+  @media (max-width: 900px) { .hero-body { grid-template-columns: 1fr; gap: 32px; } }
+
+  .hero-sub {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    color: var(--fg-2);
+    max-width: 60ch;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* HUD frame */
+  .hud-frame {
+    position: relative;
+    border: 1px solid var(--line);
+    padding: 24px;
+    background:
+      linear-gradient(135deg, rgba(0,245,255,0.04) 0%, transparent 50%),
+      var(--panel);
+    backdrop-filter: blur(8px);
+  }
+  .hud-frame::before, .hud-frame::after,
+  .hud-frame > .corner-tr, .hud-frame > .corner-br {
+    content: "";
+    position: absolute;
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--cyan);
+  }
+  .hud-frame::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .hud-frame::after  { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+  .hud-frame > .corner-tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .hud-frame > .corner-br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+  .hud-frame .label {
+    position: absolute;
+    top: -8px; left: 18px;
+    background: var(--bg);
+    padding: 0 8px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+  .hud-frame .label.tr { left: auto; right: 18px; color: var(--magenta); }
+
+  .hud-list { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+  .hud-list li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--line);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .hud-list li:last-child { border-bottom: none; }
+  .hud-list .k { color: var(--fg-3); font-size: 10px; }
+  .hud-list .v { color: var(--fg); }
+  .hud-list .v.ok   { color: var(--lime); }
+  .hud-list .v.warn { color: var(--amber); }
+  .hud-list .bars { display: inline-flex; gap: 2px; margin-left: 8px; }
+  .hud-list .bars span { width: 3px; height: 10px; background: var(--cyan); box-shadow: 0 0 4px var(--cyan); }
+  .hud-list .bars span.off { background: rgba(255,255,255,0.1); box-shadow: none; }
+
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .btn {
+    font-family: "Orbitron", sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    padding: 16px 24px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--fg);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 12px;
+    overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,245,255,0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .btn:hover::before { transform: translateX(100%); }
+  .btn:hover { border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 8px rgba(0,245,255,0.6); }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--cyan), #008fa8);
+    border-color: var(--cyan);
+    color: #001218;
+    box-shadow: 0 0 24px rgba(0,245,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .btn.primary:hover { color: #001218; text-shadow: none; box-shadow: 0 0 40px rgba(0,245,255,0.7), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+
+  /* ===== MARQUEE ===== */
+  .marquee {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(0,245,255,0.02), rgba(255,46,200,0.02));
+    overflow: hidden;
+    padding: 18px 0;
+    position: relative;
+  }
+  .marquee-track {
+    display: flex; gap: 48px;
+    animation: scroll-x 40s linear infinite;
+    white-space: nowrap;
+    font-family: "Orbitron", sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .marquee-track span {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--fg-3);
+    display: inline-flex; align-items: center; gap: 48px;
+  }
+  .marquee-track span:nth-child(3n+1)::after { content: "◆"; color: var(--cyan); -webkit-text-stroke: 0; }
+  .marquee-track span:nth-child(3n+2)::after { content: "◆"; color: var(--magenta); -webkit-text-stroke: 0; }
+  .marquee-track span:nth-child(3n+3)::after { content: "◆"; color: var(--amber); -webkit-text-stroke: 0; }
+  @keyframes scroll-x {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ===== SECTIONS ===== */
+  section { padding: 120px 32px; position: relative; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 700px) { section { padding: 80px 20px; } }
+
+  .section-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 56px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head .id {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border: 1px solid var(--line-hot);
+    padding: 6px 12px;
+    background: rgba(0,245,255,0.06);
+  }
+  .section-head h2 {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 700;
+    font-size: clamp(24px, 3.4vw, 44px);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .section-head .ts {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+  }
+  @media (max-width: 700px) {
+    .section-head { grid-template-columns: 1fr; gap: 12px; }
+    .section-head .ts { display: none; }
+  }
+
+  /* ===== SERVICES ===== */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 1000px) { .services-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 700px)  { .services-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .svc-card {
+    grid-column: span 2;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 28px 24px;
+    position: relative;
+    min-height: 280px;
+    display: flex; flex-direction: column;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+  .svc-card.span-3 { grid-column: span 3; }
+  .svc-card.span-6 { grid-column: span 6; min-height: auto; }
+  @media (max-width: 1000px) {
+    .svc-card, .svc-card.span-3 { grid-column: span 2; }
+    .svc-card.span-6 { grid-column: span 4; }
+  }
+  @media (max-width: 700px) {
+    .svc-card, .svc-card.span-3, .svc-card.span-6 { grid-column: span 2; }
+  }
+  .svc-card::before {
+    content: "";
+    position: absolute; top: 0; left: 0;
+    width: 60px; height: 1px;
+    background: var(--cyan);
+    transition: width 0.4s;
+  }
+  .svc-card:hover { border-color: var(--line-hot); background: rgba(0,245,255,0.03); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,245,255,0.1); }
+  .svc-card:hover::before { width: 100%; }
+
+  .svc-card[data-color="magenta"]::before { background: var(--magenta); }
+  .svc-card[data-color="magenta"]:hover { border-color: rgba(255,46,200,0.5); box-shadow: 0 8px 32px rgba(255,46,200,0.1); background: rgba(255,46,200,0.03); }
+  .svc-card[data-color="amber"]::before { background: var(--amber); }
+  .svc-card[data-color="amber"]:hover { border-color: rgba(255,181,71,0.5); box-shadow: 0 8px 32px rgba(255,181,71,0.1); background: rgba(255,181,71,0.03); }
+  .svc-card[data-color="lime"]::before { background: var(--lime); }
+  .svc-card[data-color="lime"]:hover { border-color: rgba(182,255,0,0.5); box-shadow: 0 8px 32px rgba(182,255,0,0.1); background: rgba(182,255,0,0.03); }
+
+  .svc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .svc-id {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .svc-id strong { color: var(--cyan); font-weight: 500; }
+  .svc-card[data-color="magenta"] .svc-id strong { color: var(--magenta); }
+  .svc-card[data-color="amber"]   .svc-id strong { color: var(--amber); }
+  .svc-card[data-color="lime"]    .svc-id strong { color: var(--lime); }
+
+  .svc-icon { width: 36px; height: 36px; color: var(--cyan); filter: drop-shadow(0 0 6px currentColor); }
+  .svc-card[data-color="magenta"] .svc-icon { color: var(--magenta); }
+  .svc-card[data-color="amber"]   .svc-icon { color: var(--amber); }
+  .svc-card[data-color="lime"]    .svc-icon { color: var(--lime); }
+
+  .svc-card h3 {
+    font-family: "Orbitron", sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0 0 12px;
+    line-height: 1.2;
+  }
+  .svc-card.span-3 h3 { font-size: 22px; }
+  .svc-card.span-6 h3 { font-size: 26px; }
+  .svc-card p { color: var(--fg-2); font-size: 13px; line-height: 1.6; margin: 0 0 16px; }
+  .svc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+  .svc-tags span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+    padding: 3px 8px;
+    border: 1px solid var(--line);
+  }
+  .svc-foot {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    display: flex; justify-content: space-between;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--fg-3);
+  }
+
+  /* ===== CREW ===== */
+  .crew { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 900px) { .crew { grid-template-columns: 1fr; } }
+
+  .operator { background: var(--panel); border: 1px solid var(--line); padding: 0; position: relative; backdrop-filter: blur(10px); }
+  .op-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    background: rgba(0,245,255,0.03);
+  }
+  .op-head .id { color: var(--cyan); }
+  .op-head .status { display: flex; align-items: center; gap: 6px; color: var(--lime); }
+  .op-head .status .d { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 6px var(--lime); animation: pulse-lime 1.5s infinite; }
+
+  .op-body { padding: 28px; display: grid; grid-template-columns: 200px 1fr; gap: 28px; }
+  @media (max-width: 600px) { .op-body { grid-template-columns: 1fr; } }
+
+  .portrait {
+    aspect-ratio: 4/5;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.15), transparent 70%),
+      repeating-linear-gradient(45deg, transparent 0 6px, rgba(120,180,255,0.04) 6px 7px);
+    border: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .portrait::before, .portrait::after {
+    content: "";
+    position: absolute;
+    width: 18px; height: 18px;
+    border: 2px solid var(--cyan);
+  }
+  .portrait::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+  .portrait::after  { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+  .portrait .crosshair { position: absolute; inset: 0; display: grid; place-items: center; }
+  .portrait .crosshair svg { width: 60%; height: 60%; opacity: 0.3; color: var(--cyan); animation: rotate 30s linear infinite; }
+  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .portrait .scan {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    box-shadow: 0 0 10px var(--cyan);
+    animation: scan-v 3s linear infinite;
+  }
+  @keyframes scan-v { 0% { top: 0%; } 100% { top: 100%; } }
+  .portrait .label {
+    position: absolute; bottom: 8px; left: 8px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    background: rgba(4,7,12,0.7);
+    padding: 3px 6px;
+    border: 1px solid var(--line-hot);
+  }
+
+  .op-info .role {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--magenta);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .op-info h3 { font-family: "Orbitron", sans-serif; font-size: 26px; text-transform: uppercase; margin: 0 0 14px; line-height: 1.1; }
+  .op-info p  { color: var(--fg-2); font-size: 13px; line-height: 1.65; margin: 0 0 22px; }
+  .op-skills .label { font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 10px; }
+  .meter-list { display: flex; flex-direction: column; gap: 8px; }
+  .meter { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .meter .name { color: var(--fg-2); }
+  .meter .bars { display: inline-flex; gap: 2px; }
+  .meter .bars span { width: 8px; height: 10px; background: var(--cyan); box-shadow: 0 0 4px rgba(0,245,255,0.5); }
+  .meter .bars span.off { background: rgba(255,255,255,0.08); box-shadow: none; }
+  .operator[data-color="magenta"] .meter .bars span:not(.off) { background: var(--magenta); box-shadow: 0 0 4px rgba(255,46,200,0.5); }
+  .operator[data-color="magenta"] .op-info .role { color: var(--cyan); }
+
+  /* ===== STACK ===== */
+  .stack-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  @media (max-width: 1000px) { .stack-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px)  { .stack-grid { grid-template-columns: 1fr; } }
+
+  .stack-card { background: var(--panel); border: 1px solid var(--line); padding: 20px; backdrop-filter: blur(10px); min-height: 220px; display: flex; flex-direction: column; }
+  .stack-card .header {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+  .stack-card .header .k { color: var(--cyan); }
+  .stack-card .header .n { color: var(--fg-3); }
+  .stack-card h4 { font-family: "Orbitron", sans-serif; font-size: 14px; text-transform: uppercase; letter-spacing: 0.02em; margin: 0 0 14px; }
+  .stack-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; }
+  .stack-list span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--fg-2);
+    padding: 3px 7px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.02);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: all 0.15s;
+  }
+  .stack-list span:hover { color: var(--cyan); border-color: var(--line-hot); }
+
+  /* ===== PROCESS ===== */
+  .process-timeline { position: relative; padding: 32px 0; }
+  .process-timeline::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-hot), var(--line-hot), transparent);
+  }
+  .timeline-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; }
+  @media (max-width: 800px) { .timeline-row { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .timeline-row { grid-template-columns: 1fr; } .process-timeline::before { display: none; } }
+
+  .step { background: var(--bg); border: 1px solid var(--line); padding: 22px 20px; position: relative; transition: all 0.2s; }
+  .step:hover { border-color: var(--line-hot); background: rgba(0,245,255,0.03); }
+  .step .marker {
+    position: absolute; top: -8px; left: 20px;
+    background: var(--bg);
+    padding: 2px 8px;
+    border: 1px solid var(--cyan);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--cyan);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .step h4 { font-family: "Orbitron", sans-serif; font-size: 16px; text-transform: uppercase; margin: 10px 0 8px; }
+  .step p  { color: var(--fg-2); font-size: 12px; line-height: 1.55; margin: 0; }
+
+  /* ===== CONTACT ===== */
+  .contact-wrap {
+    background:
+      radial-gradient(ellipse at top, rgba(0,245,255,0.08), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(255,46,200,0.06), transparent 60%),
+      var(--panel);
+    border: 1px solid var(--line);
+    padding: 60px 40px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-wrap::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    mask-image: radial-gradient(ellipse at center, black, transparent 80%);
+  }
+  .contact-inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  @media (max-width: 900px) { .contact-inner { grid-template-columns: 1fr; gap: 32px; } }
+
+  .contact-hd { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 16px; }
+  .contact-title { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: clamp(34px, 5vw, 64px); line-height: 1.05; text-transform: uppercase; margin: 0 0 24px; }
+  .contact-title .neon { color: transparent; -webkit-text-stroke: 1.5px var(--magenta); text-shadow: 0 0 18px rgba(255,46,200,0.5); }
+  .contact-sub { color: var(--fg-2); font-size: 14px; line-height: 1.65; max-width: 50ch; margin: 0 0 28px; }
+
+  .terminal {
+    background: #02050a;
+    border: 1px solid var(--line-hot);
+    box-shadow: 0 0 30px rgba(0,245,255,0.1), inset 0 0 30px rgba(0,245,255,0.04);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+  }
+  .term-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(0,245,255,0.06);
+    border-bottom: 1px solid var(--line-hot);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .term-head .dots { display: flex; gap: 5px; }
+  .term-head .dots span { width: 9px; height: 9px; border-radius: 50%; border: 1px solid currentColor; }
+  .term-head .dots span:nth-child(1) { color: var(--red); }
+  .term-head .dots span:nth-child(2) { color: var(--amber); }
+  .term-head .dots span:nth-child(3) { color: var(--lime); }
+  .term-head .title { color: var(--cyan); }
+  .term-body { padding: 18px 16px; }
+  .term-line { display: flex; align-items: baseline; gap: 10px; padding: 5px 0; }
+  .term-line .arr { color: var(--lime); }
+  .term-line .k  { color: var(--fg-3); min-width: 80px; }
+  .term-line .v  { color: var(--fg); }
+  .term-line .v a:hover { color: var(--cyan); text-shadow: 0 0 6px rgba(0,245,255,0.6); }
+  .term-cursor { color: var(--lime); animation: blink 0.8s steps(1) infinite; }
+
+  /* ===== FOOTER ===== */
+  footer {
+    padding: 40px 32px;
+    border-top: 1px solid var(--line);
+    margin-top: 60px;
+    max-width: 1400px;
+    margin-left: auto; margin-right: auto;
+  }
+  footer .row {
+    display: flex; justify-content: space-between; flex-wrap: wrap;
+    gap: 16px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--fg-3);
+  }
+  footer .row .v { color: var(--fg-2); }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- HUD chrome -->
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+<div class="noise"></div>
+<div class="vignette"></div>
+<div class="hud-corner tl"></div>
+<div class="hud-corner tr"></div>
+<div class="hud-corner bl"></div>
+<div class="hud-corner br"></div>
+
+<!-- NAV -->
+<nav class="top">
+  <div class="wrap">
+    <a class="logo" href="#top">
+      <svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="2" y="2" width="26" height="26" stroke="var(--cyan)"/>
+        <path d="M7 22 L7 8 L15 18 L23 8 L23 22" stroke="var(--cyan)" fill="none"/>
+        <circle cx="15" cy="15" r="1.5" fill="var(--magenta)" stroke="none"/>
+      </svg>
+      <span>MadTech</span>
+      <span class="ver">v.7.21</span>
+    </a>
+    <div class="nav-links">
+      <a href="#servizi"><span>// Servizi</span></a>
+      <a href="team.html"><span>// Team</span></a>
+      <a href="#stack"><span>// Stack</span></a>
+      <a href="#processo"><span>// Processo</span></a>
+      <a href="#contatti"><span>// Contatti</span></a>
+    </div>
+    <div class="nav-status">
+      <div class="stat"><span class="dot"></span><span>ONLINE</span></div>
+      <div class="stat"><span id="clock">--:--:--</span></div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-inner">
+
+    <div class="telemetry">
+      <div class="item"><span class="k">// Sys</span><span class="v">MAD-TECH OS</span></div>
+      <div class="item"><span class="k">// Loc</span><span class="v">42.40°N · 12.10°E</span></div>
+      <div class="item"><span class="k">// Mode</span><span class="v">DUAL OPERATOR</span></div>
+      <div class="item"><span class="k">// Status</span><span class="v">ACCEPTING_JOBS</span></div>
+    </div>
+
+    <div>
+      <div class="typewriter-line">init MadTech.core // hardware + software pipeline ready<span class="cursor"></span></div>
+      <h1 class="glitch" data-text="BUILD THE FUTURE.">
+        <span class="line">BUILD THE</span>
+        <span class="line neon">FUTURE.</span>
+      </h1>
+    </div>
+
+    <div class="hero-body">
+      <p class="hero-sub">Due cofondatori: <strong>David Proetto</strong>, ingegnere elettronico con esperienza nel settore della difesa, e <strong>Matteo Arrigo</strong>, sviluppatore con background hardware. Progettiamo circuiti, scriviamo codice, ripariamo dispositivi, installiamo impianti. Dal silicio al deploy, costruiamo quello che serve.<br><br>Mentalità da maker. Esecuzione da industria.</p>
+
+      <div class="hud-frame">
+        <span class="corner-tr"></span>
+        <span class="corner-br"></span>
+        <span class="label">// SCAN.OPERATIONAL</span>
+        <span class="label tr">[T+007]</span>
+        <ul class="hud-list">
+          <li><span class="k">CPU LOAD</span><span class="bars"><span></span><span></span><span></span><span></span><span></span><span class="off"></span></span></li>
+          <li><span class="k">HARDWARE</span><span class="v ok">● READY</span></li>
+          <li><span class="k">SOFTWARE</span><span class="v ok">● READY</span></li>
+          <li><span class="k">FIELD-OPS</span><span class="v ok">● READY</span></li>
+          <li><span class="k">COFFEE</span><span class="v warn">▲ CRITICAL</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ctas">
+      <a href="#contatti" class="btn primary"><span class="dot"></span>Apri trasmissione</a>
+      <a href="#servizi" class="btn"><span class="dot"></span>// Esplora moduli</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>PCB DESIGN</span>
+    <span>WEB APP</span>
+    <span>FIRMWARE</span>
+    <span>SMARTPHONE FIX</span>
+    <span>IMPIANTI</span>
+    <span>SETUP</span>
+    <span>IoT</span>
+    <span>EMBEDDED</span>
+    <span>PCB DESIGN</span>
+    <span>WEB APP</span>
+    <span>FIRMWARE</span>
+    <span>SMARTPHONE FIX</span>
+    <span>IMPIANTI</span>
+    <span>SETUP</span>
+    <span>IoT</span>
+    <span>EMBEDDED</span>
+  </div>
+</div>
+
+<!-- SERVIZI -->
+<section id="servizi">
+  <div class="section-head reveal">
+    <div class="id">// MOD.01</div>
+    <h2>Moduli operativi</h2>
+    <div class="ts">/06 unità · attive</div>
+  </div>
+
+  <div class="services-grid">
+
+    <div class="svc-card span-3 reveal" data-color="cyan">
+      <div class="svc-head">
+        <div class="svc-id"><strong>01</strong> / HARDWARE</div>
+        <svg class="svc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="4" y="4" width="16" height="16" rx="1"/>
+          <rect x="8" y="8" width="8" height="8"/>
+          <path d="M2 8h2M2 12h2M2 16h2M20 8h2M20 12h2M20 16h2M8 2v2M12 2v2M16 2v2M8 20v2M12 20v2M16 20v2"/>
+        </svg>
+      </div>
+      <h3>Progettazione hardware<br>&amp; consulenza elettronica</h3>
+      <p>Schemi, PCB, simulazione, BOM, prototipazione, test. Dal concept allo schema saldabile, con rigore ingegneristico.</p>
+      <div class="svc-tags">
+        <span>PCB</span><span>MCU</span><span>Sensoristica</span><span>Power</span><span>DFM</span>
+      </div>
+      <div class="svc-foot"><span>// LEAD: ENGINEER</span><span>→</span></div>
+    </div>
+
+    <div class="svc-card span-3 reveal" data-color="magenta">
+      <div class="svc-head">
+        <div class="svc-id"><strong>02</strong> / SOFTWARE</div>
+        <svg class="svc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M9 8l-5 4 5 4M15 8l5 4-5 4M13 5l-2 14"/>
+        </svg>
+      </div>
+      <h3>Sviluppo software<br>&amp; web application</h3>
+      <p>Web app su misura, gestionali, dashboard, API, integrazioni, firmware. Codice pulito, dal MVP al sistema in produzione.</p>
+      <div class="svc-tags">
+        <span>Web App</span><span>API</span><span>Backend</span><span>Firmware</span><span>Automazioni</span>
+      </div>
+      <div class="svc-foot"><span>// LEAD: DEV</span><span>→</span></div>
+    </div>
+
+    <div class="svc-card reveal" data-color="amber">
+      <div class="svc-head">
+        <div class="svc-id"><strong>03</strong> / FIX</div>
+        <svg class="svc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="6" y="2" width="12" height="20" rx="2"/>
+          <circle cx="12" cy="18" r="1" fill="currentColor"/>
+          <path d="M9 5h6"/>
+        </svg>
+      </div>
+      <h3>Smartphone &amp; PC</h3>
+      <p>Diagnosi, sostituzione componenti, recupero dati, upgrade.</p>
+      <div class="svc-tags"><span>iPhone</span><span>Android</span><span>PC</span></div>
+      <div class="svc-foot"><span>// DIAGNOSI GRATIS</span><span>→</span></div>
+    </div>
+
+    <div class="svc-card reveal" data-color="lime">
+      <div class="svc-head">
+        <div class="svc-id"><strong>04</strong> / SETUP</div>
+        <svg class="svc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+      <h3>Configurazioni &amp; aggiornamenti</h3>
+      <p>Setup, installazione, sicurezza, backup, migrazione dati.</p>
+      <div class="svc-tags"><span>Remoto</span><span>On-site</span></div>
+      <div class="svc-foot"><span>// 24H DELIVERY</span><span>→</span></div>
+    </div>
+
+    <div class="svc-card reveal" data-color="cyan">
+      <div class="svc-head">
+        <div class="svc-id"><strong>05</strong> / ELECTRIC</div>
+        <svg class="svc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
+        </svg>
+      </div>
+      <h3>Impianti elettrici civili</h3>
+      <p>Punti luce, prese, predisposizioni domotica, manutenzione.</p>
+      <div class="svc-tags"><span>Residenziale</span><span>Manutenzione</span></div>
+      <div class="svc-foot"><span>// FIELD-OP</span><span>→</span></div>
+    </div>
+
+    <div class="svc-card span-6 reveal" data-color="magenta">
+      <div class="svc-head">
+        <div class="svc-id"><strong>06</strong> / CUSTOM&nbsp;BUILD&nbsp;//&nbsp;HARDWARE × SOFTWARE</div>
+        <svg class="svc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <h3>Soluzioni su misura — quando non basta una sola disciplina</h3>
+      <p style="max-width: 70ch;">Dispositivi connessi, automazioni industriali leggere, prototipi IoT, interfacce tra hardware esistente e gestionali web. È il punto in cui le nostre due competenze si fondono in un unico progetto chiavi in mano. <span style="color: var(--magenta);">Parlaci del problema, ti diciamo se possiamo costruirlo.</span></p>
+      <div class="svc-tags">
+        <span>IoT</span><span>Prototipi</span><span>Automazione</span><span>Integrazione</span><span>Custom firmware</span><span>Dashboards</span>
+      </div>
+      <div class="svc-foot"><span>// FULL-STACK ENGINEERING</span><span>→ PARLIAMONE</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CREW -->
+<section id="crew">
+  <div class="section-head reveal">
+    <div class="id">// MOD.02</div>
+    <h2>Operatori</h2>
+    <div class="ts">/02 attivi · /00 in pausa</div>
+  </div>
+
+  <div class="crew">
+
+    <div class="operator reveal" data-color="cyan">
+      <div class="op-head">
+        <span class="id">// OP_01 :: ENGINEER</span>
+        <span class="status"><span class="d"></span>ONLINE</span>
+      </div>
+      <div class="op-body">
+        <div class="portrait">
+          <div class="crosshair">
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
+              <circle cx="50" cy="50" r="45"/>
+              <circle cx="50" cy="50" r="32"/>
+              <circle cx="50" cy="50" r="20"/>
+              <path d="M50 5v90M5 50h90"/>
+            </svg>
+          </div>
+          <div class="scan"></div>
+          <div class="label">// CAM.OP_01</div>
+        </div>
+        <div class="op-info">
+          <div class="role">// INGEGNERE ELETTRONICO</div>
+          <h3>David Proetto</h3>
+          <p>Ingegnere elettronico, esperienza industriale e nel settore della difesa nazionale. Definisce architetture, progetta schede, porta il rigore di sistemi complessi nei progetti del team.</p>
+          <div class="op-skills">
+            <div class="label">// CAPABILITY MATRIX</div>
+            <div class="meter-list">
+              <div class="meter"><span class="name">PCB Design</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+              <div class="meter"><span class="name">Embedded</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+              <div class="meter"><span class="name">Analog/Digital</span><span class="bars"><span></span><span></span><span></span><span></span><span class="off"></span></span></div>
+              <div class="meter"><span class="name">Power Electronics</span><span class="bars"><span></span><span></span><span></span><span></span><span class="off"></span></span></div>
+              <div class="meter"><span class="name">Testing &amp; Validation</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="operator reveal" data-color="magenta">
+      <div class="op-head">
+        <span class="id">// OP_02 :: DEVELOPER</span>
+        <span class="status"><span class="d"></span>ONLINE</span>
+      </div>
+      <div class="op-body">
+        <div class="portrait">
+          <div class="crosshair">
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
+              <rect x="20" y="20" width="60" height="60"/>
+              <rect x="35" y="35" width="30" height="30"/>
+              <path d="M50 5v90M5 50h90"/>
+            </svg>
+          </div>
+          <div class="scan"></div>
+          <div class="label">// CAM.OP_02</div>
+        </div>
+        <div class="op-info">
+          <div class="role">// PROGRAMMATORE · PERITO INFORMATICO</div>
+          <h3>Matteo Arrigo</h3>
+          <p>Sviluppatore e tecnico con anni di esperienza sul campo. Scrivo software, riparo hardware, installo e configuro sistemi: dalla web app al cablaggio, sono la parte operativa del team.</p>
+          <div class="op-skills">
+            <div class="label">// CAPABILITY MATRIX</div>
+            <div class="meter-list">
+              <div class="meter"><span class="name">Web App</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+              <div class="meter"><span class="name">Firmware</span><span class="bars"><span></span><span></span><span></span><span></span><span class="off"></span></span></div>
+              <div class="meter"><span class="name">Hardware Repair</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+              <div class="meter"><span class="name">Electrical</span><span class="bars"><span></span><span></span><span></span><span></span><span class="off"></span></span></div>
+              <div class="meter"><span class="name">IT Setup</span><span class="bars"><span></span><span></span><span></span><span></span><span></span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="section-head reveal">
+    <div class="id">// MOD.03</div>
+    <h2>Tech Stack</h2>
+    <div class="ts">/05 categorie · ~50 tools</div>
+  </div>
+
+  <div class="stack-grid">
+
+    <div class="stack-card reveal">
+      <div class="header"><span class="k">// A_HW</span><span class="n">12 items</span></div>
+      <h4>Hardware</h4>
+      <div class="stack-list">
+        <span>KiCad</span><span>Altium</span><span>STM32</span><span>ESP32</span>
+        <span>Arduino</span><span>RPi</span><span>SPI</span><span>I²C</span>
+        <span>CAN</span><span>Saldatura SMD</span><span>Oscilloscopio</span><span>Logic</span>
+      </div>
+    </div>
+
+    <div class="stack-card reveal">
+      <div class="header"><span class="k">// B_SW</span><span class="n">11 items</span></div>
+      <h4>Software</h4>
+      <div class="stack-list">
+        <span>TypeScript</span><span>React</span><span>Node.js</span>
+        <span>Python</span><span>C/C++</span><span>Postgres</span>
+        <span>Linux</span><span>Docker</span><span>REST</span><span>Websocket</span><span>Git</span>
+      </div>
+    </div>
+
+    <div class="stack-card reveal">
+      <div class="header"><span class="k">// C_FIX</span><span class="n">8 items</span></div>
+      <h4>Riparazioni</h4>
+      <div class="stack-list">
+        <span>iPhone</span><span>Android</span><span>Notebook</span><span>Desktop</span>
+        <span>Schermi</span><span>Batterie</span><span>SSD/RAM</span><span>Recupero dati</span>
+      </div>
+    </div>
+
+    <div class="stack-card reveal">
+      <div class="header"><span class="k">// D_ELE</span><span class="n">6 items</span></div>
+      <h4>Impianti</h4>
+      <div class="stack-list">
+        <span>Civile</span><span>Punti luce</span><span>Dati</span>
+        <span>Quadri</span><span>Domotica</span><span>Manutenzione</span>
+      </div>
+    </div>
+
+    <div class="stack-card reveal">
+      <div class="header"><span class="k">// E_IT</span><span class="n">7 items</span></div>
+      <h4>Setup &amp; IT</h4>
+      <div class="stack-list">
+        <span>Reti</span><span>NAS</span><span>Backup</span>
+        <span>Sicurezza</span><span>Migrazione</span><span>Cloud</span><span>Office</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROCESSO -->
+<section id="processo">
+  <div class="section-head reveal">
+    <div class="id">// MOD.04</div>
+    <h2>Protocollo operativo</h2>
+    <div class="ts">/04 fasi · tempo medio: 1-6 settimane</div>
+  </div>
+
+  <div class="process-timeline">
+    <div class="timeline-row">
+      <div class="step reveal">
+        <span class="marker">// 01 · SCAN</span>
+        <h4>Ascolto</h4>
+        <p>Chiamata o messaggio. Capiamo il problema reale — non solo la richiesta letterale.</p>
+      </div>
+      <div class="step reveal">
+        <span class="marker">// 02 · PLAN</span>
+        <h4>Proposta</h4>
+        <p>Preventivo chiaro con scope, tempi, deliverable. Nessuna sorpresa in fattura.</p>
+      </div>
+      <div class="step reveal">
+        <span class="marker">// 03 · BUILD</span>
+        <h4>Esecuzione</h4>
+        <p>Sviluppo, prototipo o intervento. Checkpoint condivisi, aggiornamenti regolari.</p>
+      </div>
+      <div class="step reveal">
+        <span class="marker">// 04 · DEPLOY</span>
+        <h4>Consegna</h4>
+        <p>Test, documentazione essenziale, supporto post-consegna concordato.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATTI -->
+<section id="contatti">
+  <div class="contact-wrap reveal">
+    <div class="contact-inner">
+      <div>
+        <div class="contact-hd">// MOD.05 · TRANSMISSION</div>
+        <h1 class="contact-title">Hai un'idea<br>o un guaio?<br><span class="neon">Scrivici.</span></h1>
+        <p class="contact-sub">
+          Risposta entro 24 ore lavorative. Diagnosi gratuita per le riparazioni.
+          Per progetti più grandi, una prima call senza impegno.
+        </p>
+        <div class="ctas">
+          <a href="mailto:info@madtech.it" class="btn primary"><span class="dot"></span>Apri canale email</a>
+          <a href="https://wa.me/393403130338" class="btn"><span class="dot"></span>// WhatsApp David</a>
+          <a href="https://wa.me/393501864313" class="btn"><span class="dot"></span>// WhatsApp Matteo</a>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="term-head">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span class="title">madtech://contact</span>
+          <span>● REC</span>
+        </div>
+        <div class="term-body">
+          <div class="term-line"><span class="arr">$</span><span class="k">EMAIL</span><span class="v"><a href="mailto:info@madtech.it">info@madtech.it</a></span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">DAVID</span><span class="v"><a href="mailto:david7.piesse21@madtech.it">david7.piesse21@madtech.it</a></span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">MATTEO</span><span class="v"><a href="mailto:matteo@madtech.it">matteo@madtech.it</a></span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">DAVID</span><span class="v"><a href="https://wa.me/393403130338">+39 340 313 0338</a></span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">MATTEO</span><span class="v"><a href="https://wa.me/393501864313">+39 350 186 4313</a></span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">DAVID</span><span class="v">Roma · remoto + on-site</span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">MATTEO</span><span class="v">Catania · remoto + on-site</span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">SLA</span><span class="v" style="color: var(--lime);">&lt; 24h lavorative</span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">PREVENTIVI</span><span class="v" style="color: var(--lime);">SEMPRE GRATUITI</span></div>
+          <div class="term-line"><span class="arr">$</span><span class="k">AWAITING</span><span class="v">_input<span class="term-cursor">█</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="row">
+    <span>© 2026 // MadTech · Studio tecnico</span>
+    <span class="v">P.IVA — da definire</span>
+    <span>System v7.21 // Made in Italy</span>
+  </div>
+</footer>
+
+<script>
+  // Live clock
+  function tick() {
+    const el = document.getElementById('clock');
+    if (el) el.textContent = new Date().toTimeString().slice(0, 8);
+  }
+  setInterval(tick, 1000); tick();
+
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
