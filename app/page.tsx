@@ -63,9 +63,9 @@ export default function Home() {
         <section className="hero container">
           <p className="eyebrow">Studio software · Italia</p>
           <h1>
-            Il tuo lavoro, fuori dal quaderno.{" "}
+            Il tuo lavoro, fuori dal quaderno. Dentro un{" "}
             <span className="pen-underline">
-              Dentro un software
+              software
               <svg viewBox="0 0 300 20" aria-hidden="true">
                 <path d="M2 12 C 60 4, 140 18, 298 8" />
               </svg>
